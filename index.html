@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GSAP + Lenis Scroll Motion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 스크롤 진행도 바 -->
+  <div class="progress"></div>
+
+  <nav class="nav">
+    <span class="logo">flawless<b>Jimmy</b></span>
+    <span class="hint">scroll ↓</span>
+  </nav>
+
+  <!-- 1. 히어로: 글자가 한 줄씩 올라오며 등장 -->
+  <section class="hero">
+    <h1 class="hero-title">
+      <span class="line"><span>Scroll</span></span>
+      <span class="line"><span>Driven</span></span>
+      <span class="line"><span>Motion.</span></span>
+    </h1>
+    <p class="hero-sub">GSAP ScrollTrigger + Lenis smooth scroll</p>
+  </section>
+
+  <!-- 2. 패럴랙스: 스크롤 속도에 따라 다른 속도로 움직이는 레이어 -->
+  <section class="parallax">
+    <div class="parallax-layer" data-speed="0.3"><div class="blob blob-a"></div></div>
+    <div class="parallax-layer" data-speed="0.6"><div class="blob blob-b"></div></div>
+    <h2 class="parallax-text">Parallax<br />Layers</h2>
+  </section>
+
+  <!-- 3. 핀 + 가로 스크롤: 세로로 내리면 카드가 가로로 흐름 -->
+  <section class="horizontal">
+    <div class="track">
+      <div class="panel"><span>01</span><h3>Pin</h3><p>섹션을 화면에 고정하고</p></div>
+      <div class="panel"><span>02</span><h3>Scrub</h3><p>스크롤 위치에 타임라인을 묶고</p></div>
+      <div class="panel"><span>03</span><h3>Horizontal</h3><p>세로 스크롤을 가로 이동으로 바꿉니다</p></div>
+      <div class="panel"><span>04</span><h3>Lenis</h3><p>모든 움직임을 부드럽게 보간합니다</p></div>
+    </div>
+  </section>
+
+  <!-- 4. 스태거 카드: 뷰포트 진입 시 순차 등장 -->
+  <section class="cards">
+    <h2 class="section-title reveal">Stagger Reveal</h2>
+    <div class="grid">
+      <div class="card"><h3>Ease</h3><p>power3.out</p></div>
+      <div class="card"><h3>Duration</h3><p>0.8s</p></div>
+      <div class="card"><h3>Stagger</h3><p>0.12s</p></div>
+      <div class="card"><h3>Trigger</h3><p>top 80%</p></div>
+      <div class="card"><h3>Scrub</h3><p>false</p></div>
+      <div class="card"><h3>Once</h3><p>true</p></div>
+    </div>
+  </section>
+
+  <!-- 5. 스케일 이미지: 스크롤에 맞춰 커지는 박스 -->
+  <section class="scale">
+    <div class="scale-box">
+      <h2>Scrub<br />Scale</h2>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p class="reveal">Made with GSAP &amp; Lenis</p>
+  </footer>
+
+  <!-- 라이브러리 (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
