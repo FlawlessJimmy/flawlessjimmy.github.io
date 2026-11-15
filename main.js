@@ -98,6 +98,17 @@
     });
 
     /* 휴대폰: 케이스 단계 한 칸씩 멈춤은 style.css의 scroll-snap(브라우저 기본 기능)으로 처리합니다 */
+    // 케이스 단계 구간(첫 단계 ~ 마지막 단계)에 들어와 있을 때만 한 칸씩 멈춤을 켭니다. 랜딩 · 소개 · 숫자 등 나머지는 자연스럽게.
+    const snapZones = new Set();
+    document.querySelectorAll('.case .case-steps').forEach((cst) => {
+      ScrollTrigger.create({
+        trigger: cst, start: 'top 75%', end: 'bottom 60%',
+        onToggle: (self) => {
+          self.isActive ? snapZones.add(cst) : snapZones.delete(cst);
+          document.documentElement.classList.toggle('cs-snap', snapZones.size > 0);
+        },
+      });
+    });
     // 혹시 세게 밀어 두 단계 이상 건너뛰면, 밀기 시작한 단계의 바로 다음 단계로 부드럽게 돌아옵니다
     const mob = matchMedia('(max-width: 900px)');
     const stopsOf = (cs) => {
