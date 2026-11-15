@@ -2,10 +2,10 @@
 import * as THREE from 'three';
 
 const SLIDES = [
-  { img: 'shots/cover-off8.jpg', year: '2026.11', kind: '개인 프로젝트 · SaaS 제품 사이트', title: 'OFF8 업무 자동화 대시보드', desc: '직접 운영한 유료 PoC 3건을 바탕으로, 흩어진 엑셀이 대시보드가 되는 과정과 AI 상담을 제품 사이트로 보여 줍니다.', tags: ['사업 기획', '브랜딩', '구현'], more: '#more', link: 'https://flawlessjimmy.github.io/off8/' },
-  { img: 'shots/cover-tessera.jpg', year: '2026.11', kind: '개인 프로젝트 · 자재 플랫폼', title: 'Tessera 인테리어 자재 플랫폼', desc: '34종 자재의 질감과 디테일을 가까이서 보고, 가격을 비교해 평수별 견적까지 한 번에 내는 인테리어 자재 플랫폼입니다.', tags: ['자재 디테일', '가격 · 견적', 'Three.js'], more: '#more', link: 'https://flawlessjimmy.github.io/tessera/' },
-  { img: 'shots/cover-maoxga.jpg', year: '2026', kind: '클라이언트 · 카페24 자사몰', title: '묘향가 자사몰 리뉴얼', desc: '카페24 자사몰 전 페이지를 모바일 우선으로 다시 설계하고 구현했습니다. 회원·장바구니·네이버페이·실시간 상담까지 연결합니다.', tags: ['Cafe24', 'UX 설계', '구현'], more: '#more', link: 'https://www.maoxga.com/' },
-  { img: 'shots/cover-kanto.jpg', year: '2026', kind: '클라이언트 · 업무 시스템', title: 'KANTO 발주 자동화', desc: '엑셀 수작업 대조를 웹 흐름으로 바꿨습니다. 자동 매칭률 98%, 월간 리포트 생성 시간은 85초에서 4초로 줄었습니다.', tags: ['Web App', '엑셀 변환', 'Cloudflare'], more: '#more', link: 'https://kanto-order-server.pages.dev' },
+  { img: 'shots/cover-off8.jpg', year: '2026.11', kind: '개인 프로젝트 · SaaS 제품 사이트', title: 'OFF8 업무 자동화 대시보드', desc: '직접 운영한 유료 PoC 3건을 바탕으로, 흩어진 엑셀이 대시보드가 되는 과정과 AI 상담을 제품 사이트로 보여 줍니다.', tags: ['사업 기획', '브랜딩', '구현'], more: '', link: 'https://flawlessjimmy.github.io/off8/' },
+  { img: 'shots/cover-tessera.jpg', year: '2026.11', kind: '개인 프로젝트 · 자재 플랫폼', title: 'Tessera 인테리어 자재 플랫폼', desc: '34종 자재의 질감과 디테일을 가까이서 보고, 가격을 비교해 평수별 견적까지 한 번에 내는 인테리어 자재 플랫폼입니다.', tags: ['자재 디테일', '가격 · 견적', 'Three.js'], more: '', link: 'https://flawlessjimmy.github.io/tessera/' },
+  { img: 'shots/cover-maoxga.jpg', year: '2026', kind: '클라이언트 · 카페24 자사몰', title: '묘향가 자사몰 리뉴얼', desc: '카페24 자사몰 전 페이지를 모바일 우선으로 다시 설계하고 구현했습니다. 회원·장바구니·네이버페이·실시간 상담까지 연결합니다.', tags: ['Cafe24', 'UX 설계', '구현'], more: '', link: 'https://www.maoxga.com/' },
+  { img: 'shots/cover-kanto.jpg', year: '2026', kind: '클라이언트 · 업무 시스템', title: 'KANTO 발주 자동화', desc: '엑셀 수작업 대조를 웹 흐름으로 바꿨습니다. 자동 매칭률 98%, 월간 리포트 생성 시간은 85초에서 4초로 줄었습니다.', tags: ['Web App', '엑셀 변환', 'Cloudflare'], more: '', link: 'https://kanto-order-server.pages.dev' },
   { img: 'shots/cover-h2b.jpg', year: '2026', kind: '클라이언트 · 경영 대시보드', title: 'H2B 운영 대시보드', desc: '월 8천만 원대 매출을 다루는 대시보드를 설계부터 운영까지 맡았습니다. AS 칸반, AI 상담 큐, 매출·순이익 계산을 한곳에 모았습니다.', tags: ['FastAPI', 'PostgreSQL', '운영'], more: '#case-h2b', link: 'https://h2b-3cr.pages.dev' },
   { img: 'shots/cover-earthmera.jpg', year: '2024 — 2025', kind: 'EarthMera · Founding Product Designer', title: 'EarthMera, 세 개의 프로덕트', desc: '뉴욕 친환경 스타트업의 파운딩 디자이너로 탄소 기록 앱, 이벤트 플랫폼, 링크인바이오 ZIGU를 기획부터 핸드오프까지 맡았습니다.', tags: ['신규 가입 +1,000', '미션 완료 90%', '구독 +100'], more: '#case-earthmera', link: 'https://www.earthmera.com/ko/' },
 ];
@@ -39,7 +39,10 @@ function fill(i) {
   tags.innerHTML = s.tags.map((t) => `<span>${t}</span>`).join('');
   link.hidden = !s.link;
   if (s.link) link.href = s.link;
-  more.setAttribute('href', s.more);
+  // 사이트 안에 자세한 설명(케이스)이 있는 작업만 '자세히 보기', 나머지는 '사이트'만
+  more.hidden = !s.more;
+  if (s.more) more.setAttribute('href', s.more);
+  link.classList.toggle('is-primary', !s.more);
   [...dots.children].forEach((d, k) => d.classList.toggle('is-on', k === i));
   if (fallback) fallback.src = s.img;
 }

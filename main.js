@@ -97,30 +97,40 @@
       gsap.from($$('.case-nums > div', cs), { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, scrollTrigger: { trigger: $('.case-nums', cs), start: 'top 88%', once: true } });
     });
 
-    /* 휴대폰: 케이스 글이 멈추면 다음 글이 화면 칸 바로 아래에 딱 맞춰집니다 */
+    /* 휴대폰: 케이스 단계 한 칸씩 멈춤은 style.css의 scroll-snap(브라우저 기본 기능)으로 처리합니다 */
+    // 혹시 세게 밀어 두 단계 이상 건너뛰면, 밀기 시작한 단계의 바로 다음 단계로 부드럽게 돌아옵니다
     const mob = matchMedia('(max-width: 900px)');
-    let snapT = null, snapping = false;
+    const stopsOf = (cs) => {
+      const off = cs.querySelector('.case-stage').offsetHeight + 8, sc = window.lenis.scroll;
+      return [...cs.querySelectorAll('.cs-step')].map((st) => Math.round(st.getBoundingClientRect().top + sc - off));
+    };
+    const nearest = (ys, y) => ys.reduce((k, v, i) => (Math.abs(v - y) < Math.abs(ys[k] - y) ? i : k), 0);
+    let g = null, endT = null, fixing = false;
+    addEventListener('touchstart', () => {
+      g = null;
+      if (!mob.matches || !window.lenis || fixing) return;
+      const y = window.lenis.scroll;
+      for (const cs of document.querySelectorAll('.case')) {
+        const ys = stopsOf(cs);
+        if (y >= ys[0] - 4 && y <= ys[ys.length - 1] + 4) { g = { cs, k: nearest(ys, y) }; break; }
+      }
+    }, { passive: true });
     window.lenis?.on('scroll', () => {
-      if (!mob.matches || snapping) return;
-      clearTimeout(snapT);
-      snapT = setTimeout(() => {
-        for (const cs of document.querySelectorAll('.case')) {
-          const stage = cs.querySelector('.case-stage'), steps = [...cs.querySelectorAll('.cs-step')];
-          const sr = stage.getBoundingClientRect();
-          if (sr.top > 1) continue;                      // 화면 칸이 아직 위에 붙지 않음
-          const line = sr.bottom + 8;
-          const last = steps[steps.length - 1].getBoundingClientRect();
-          if (last.bottom < line) continue;              // 이 케이스는 이미 지나감
-          let best = null;
-          steps.forEach((st) => { const d = st.getBoundingClientRect().top - line; if (best === null || Math.abs(d) < Math.abs(best)) best = d; });
-          if (best !== null && Math.abs(best) > 3 && Math.abs(best) < innerHeight * 0.42) {
-            snapping = true;
-            window.lenis.scrollTo(window.lenis.scroll + best, { duration: 0.6, easing: (x) => 1 - Math.pow(1 - x, 3), onComplete: () => { snapping = false; } });
-            setTimeout(() => { snapping = false; }, 900);
-          }
-          break;
+      if (!g || fixing) return;
+      clearTimeout(endT);
+      endT = setTimeout(() => {           // 손을 떼고 미끄러짐까지 멈춘 뒤 확인
+        const { cs, k } = g;
+        g = null;
+        const ys = stopsOf(cs), y = window.lenis.scroll;
+        const dir = y > ys[k] ? 1 : -1;
+        const passed = ys.filter((v) => (dir > 0 ? v > ys[k] + 4 && v < y - 4 : v < ys[k] - 4 && v > y + 4)).length;
+        const nxt = k + dir;
+        if (passed >= 1 && nxt >= 0 && nxt < ys.length && Math.abs(y - ys[nxt]) > 6) {
+          fixing = true;
+          window.lenis.scrollTo(ys[nxt], { duration: 0.55, easing: (x) => 1 - Math.pow(1 - x, 3), force: true, onComplete: () => { fixing = false; } });
+          setTimeout(() => { fixing = false; }, 900);
         }
-      }, 140);
+      }, 160);
     });
 
     /* 휴대폰: 그 밖의 작업 넘김 점 */
@@ -151,6 +161,20 @@
 
     /* PROCESS: 단계가 차례로, 선이 이어집니다 */
     gsap.from('.pr-steps li', { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.pr-steps', start: 'top 82%', once: true } });
+    // 빛이 상자 테두리를 타고 내려가기: 휴대폰은 상자마다 제 위치에서, 큰 화면은 01 → 05 차례로
+    const prs = $$('.pr-steps li');
+    const lightAt = (li, t) => {
+      li.style.setProperty('--ly', (-40 + t * 180).toFixed(1) + '%');
+      li.style.setProperty('--glow', Math.max(0, Math.sin(Math.min(1, Math.max(0, t)) * Math.PI)).toFixed(3));
+    };
+    ScrollTrigger.matchMedia({
+      '(max-width: 900px)': () => {
+        prs.forEach((li) => ScrollTrigger.create({ trigger: li, start: 'top 80%', end: 'bottom 30%', scrub: true, onUpdate: (s) => lightAt(li, s.progress), onLeave: () => lightAt(li, 1), onLeaveBack: () => lightAt(li, 0) }));
+      },
+      '(min-width: 901px)': () => {
+        ScrollTrigger.create({ trigger: '.pr-steps', start: 'top 80%', end: 'bottom 20%', scrub: true, onUpdate: (s) => prs.forEach((li, k) => lightAt(li, s.progress * (prs.length + 1) - k)) });
+      },
+    });
 
     /* OPS: 막대가 줄어들고 숫자가 내려감 */
     $$('.ops-card').forEach((card) => {
