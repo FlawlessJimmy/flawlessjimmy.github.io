@@ -16,8 +16,8 @@ SLIDES.forEach((s) => { s.kind = T(s.kind); s.title = T(s.title); s.desc = T(s.d
 
 // 영어일 때는 표지 안 글자도 영어로 만든 표지(cover-*-en.jpg)를 씁니다
 if (window.i18n?.isEn) {
-  SLIDES.forEach((s) => { s.img = s.img.replace(/\.jpg$/, '-en.jpg'); });
-  document.querySelectorAll('img[src^="shots/cover-"]').forEach((im) => { if (!/-en\.jpg$/.test(im.getAttribute('src'))) im.setAttribute('src', im.getAttribute('src').replace(/\.jpg$/, '-en.jpg')); });
+  SLIDES.forEach((s) => { s.img = s.img.replace(/\.jpg$/, '-en.jpg?v=2'); });
+  document.querySelectorAll('img[src^="shots/cover-"]').forEach((im) => { if (!/-en\.jpg/.test(im.getAttribute('src'))) im.setAttribute('src', im.getAttribute('src').replace(/\.jpg$/, '-en.jpg?v=2')); });
 }
 
 // 작업마다 바탕에 번지는 빛의 색
