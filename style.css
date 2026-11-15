@@ -438,3 +438,43 @@ h2.kr { letter-spacing: -.03em; line-height: 1.22; }
 .hero-title .line { margin-bottom: -.03em; }
 .hero-title .line:last-child { margin-bottom: -.18em; }
 @media (max-width: 860px) { .nav-links a.nav-od { display: none; } }
+
+/* ---------- 랜딩: 휘어진 화면 넘기기 ---------- */
+.flip { position: relative; }
+.flip-pin { position: relative; height: 100svh; overflow: hidden; background: radial-gradient(70% 55% at 50% 38%, rgba(60, 207, 230, .12), transparent 70%), var(--bg); }
+#flipGl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.flip-fallback { display: none; }
+.no-gl .flip-fallback { display: block; position: absolute; left: 50%; top: 40%; width: min(66vw, 980px); transform: translate(-50%, -50%); border-radius: 18px; }
+.flip-head { position: absolute; left: var(--pad); right: var(--pad); top: 96px; display: flex; justify-content: space-between; gap: 20px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); pointer-events: none; }
+.flip-hint { letter-spacing: 0; text-transform: none; }
+.flip-info { position: absolute; left: var(--pad); right: var(--pad); bottom: 7vh; display: grid; grid-template-columns: 150px minmax(0, 1fr) 280px; gap: 32px; align-items: end; }
+.flip-info .swap { display: block; }
+.fi-num { display: flex; align-items: baseline; gap: 8px; }
+.fi-num b { font-size: clamp(44px, 5vw, 72px); font-weight: 700; letter-spacing: -.05em; line-height: 1; color: var(--fg); }
+.fi-num span { color: var(--muted); font-size: 15px; }
+.fi-kind { font-size: 13px; font-weight: 600; color: var(--mint); margin-bottom: 8px; }
+.fi-title { font-size: clamp(26px, 2.8vw, 44px); font-weight: 700; letter-spacing: -.035em; line-height: 1.2; margin: 0 0 10px; }
+.fi-desc { margin: 0; max-width: 640px; color: #a9b6bb; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.7; }
+.fi-side { display: grid; gap: 12px; justify-items: start; }
+.fi-year { font-size: 14px; color: var(--muted); letter-spacing: .06em; }
+.fi-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.fi-tags span { font-size: 12.5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); color: #c5d0d4; }
+.fi-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 999px; background: var(--mint); color: #001a17; font-weight: 700; font-size: 14px; }
+.fi-link[hidden] { display: none; }
+.flip-dots { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(7vh + 150px); display: flex; gap: 8px; }
+.flip-dots button { width: 7px; height: 7px; border-radius: 99px; border: 0; padding: 0; background: rgba(255, 255, 255, .25); cursor: pointer; transition: width .4s var(--ease), background .3s; }
+.flip-dots button.is-on { width: 26px; background: var(--mint); }
+@media (max-width: 900px) {
+  .flip-head { top: 84px; flex-direction: column; gap: 6px; }
+  .flip-info { grid-template-columns: minmax(0, 1fr); gap: 12px; bottom: 5vh; }
+  .fi-num b { font-size: 38px; }
+  .fi-side { grid-auto-flow: column; justify-content: start; align-items: center; }
+  .flip-info .fi-tags { display: none; }
+  .flip-dots { bottom: auto; top: 58%; }
+}
+/* 돋보기 커서 */
+.cursor.is-lens-hide, .cursor.is-lens-hide + .cursor-dot { opacity: 0; }
+.lens { position: fixed; left: 0; top: 0; z-index: 140; width: 230px; height: 230px; margin: -115px 0 0 -115px; border-radius: 50%; overflow: hidden; pointer-events: none; background: var(--bg); border: 1.5px solid rgba(98, 240, 221, .7); box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .8), 0 0 0 6px rgba(98, 240, 221, .08), inset 0 0 40px rgba(98, 240, 221, .12); }
+.lens-text { position: absolute; left: 0; top: 0; margin: 0; transform-origin: 0 0; max-width: none; }
+.lens::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .14), transparent 42%); }
+.manifesto-text { cursor: none; }

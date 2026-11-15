@@ -1,4 +1,4 @@
-/* 심녕호 포트폴리오 · GSAP + ScrollTrigger + SplitText + Lenis (3D 배경은 hero3d.js) */
+/* 심녕호 포트폴리오 · GSAP + ScrollTrigger + SplitText + Lenis (랜딩 3D는 flip.js) */
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -50,7 +50,6 @@
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   lenis.scrollTo(0, { immediate: true, force: true });
-  lenis.stop();
   $$('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); lenis.scrollTo(a.getAttribute('href'), { duration: 1.6 }); }));
 
   /* ── 커서 + 마그네틱 ── */
@@ -74,26 +73,6 @@
 
   function init() {
     window.scrollTo(0, 0);
-    const heroSplit = new SplitText('.hero-title .line', { type: 'chars' });
-    gsap.set(heroSplit.chars, { yPercent: 145 });
-    gsap.set('.hero-eyebrow, .hero-sub, .hero-scroll', { y: 24, opacity: 0 });
-    const num = $('.loader .num'), bar = $('.loader-bar i'), c = { v: 0 };
-    gsap.timeline()
-      .to(c, { v: 100, duration: reduceMotion ? 0.3 : 1.6, ease: 'power2.inOut', onUpdate: () => { num.textContent = Math.round(c.v); bar.style.transform = `scaleX(${c.v / 100})`; } })
-      .to('.loader-count, .loader-bar, .loader-label', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.in', stagger: 0.05 })
-      .to('.loader', { yPercent: -100, duration: 1.1, ease: 'expo.inOut' }, '-=0.1')
-      .add(() => {
-        document.documentElement.classList.remove('is-loading');
-        window.scrollTo(0, 0);
-        lenis.scrollTo(0, { immediate: true, force: true });
-        lenis.start();
-        window.__heroIntroDone = true;
-        window.dispatchEvent(new Event('hero:intro'));
-        gsap.timeline()
-          .to(heroSplit.chars, { yPercent: 0, duration: 1.3, ease: 'expo.out', stagger: 0.03 })
-          .to('.hero-eyebrow, .hero-sub, .hero-scroll', { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: 0.1 }, '-=1');
-      }, '-=0.6')
-      .set('.loader', { display: 'none' });
     setupScroll();
     ScrollTrigger.refresh();
   }
@@ -104,11 +83,6 @@
     ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (s) => nav.classList.toggle('is-hidden', s.direction === 1 && s.scroll() > 200) });
     $$('[data-reveal]').forEach((el) => gsap.from(el, { y: 40, opacity: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } }));
 
-    /* HERO */
-    ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true, onUpdate: (s) => { window.__heroProgress = s.progress; } });
-    gsap.to('.hero-title', { yPercent: -25, opacity: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
-    gsap.to('.hero-bottom, .hero-eyebrow', { y: -60, opacity: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '50% top', scrub: true } });
-
     /* MARQUEE */
     const loops = $$('.marquee-track').map((tr, i) => { const tw = gsap.to(tr, { xPercent: -50, ease: 'none', duration: i ? 34 : 28, repeat: -1 }); tw.totalTime(tw.duration() * 1000); return tw; });
     const mrows = $$('.marquee-row');
@@ -116,9 +90,10 @@
     ScrollTrigger.create({ trigger: '.marquee', start: 'top bottom', end: 'bottom top', onUpdate: (s) => { const v = s.getVelocity(); dir = s.direction; target = dir * (1 + Math.min(Math.abs(v) / 260, 6)); skew = gsap.utils.clamp(-10, 10, v / -180); } });
     gsap.ticker.add(() => { speed += (target - speed) * 0.08; target += (dir - target) * 0.04; skew *= 0.9; loops.forEach((tw, i) => tw.timeScale(speed * (i ? -1 : 1))); mrows.forEach((r) => gsap.set(r, { skewX: skew })); });
 
-    /* ABOUT */
+    /* ABOUT: 글자가 차례로 밝아지고, 마우스를 대면 돋보기처럼 커집니다 */
     const man = new SplitText('.manifesto-text', { type: 'words' });
     gsap.fromTo(man.words, { opacity: 0.12 }, { opacity: 1, ease: 'none', stagger: 0.1, scrollTrigger: { trigger: '.manifesto-text', start: 'top 80%', end: 'bottom 55%', scrub: true } });
+    magnifier($('.manifesto-text'));
 
     /* WORK: 가로 이동 + 카드 속 화면 스크롤 */
     const wTrack = $('.work-track');
@@ -228,5 +203,40 @@
     const ctaSplit = new SplitText('.cta-title .line', { type: 'chars' });
     gsap.from(ctaSplit.chars, { yPercent: 145, duration: 1.2, ease: 'expo.out', stagger: 0.025, scrollTrigger: { trigger: '.cta', start: 'top 65%' } });
     gsap.from('.cta-btn', { y: 30, opacity: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: '.cta', start: 'top 55%' } });
+  }
+
+  /* 돋보기: 커서를 따라다니는 동그란 렌즈 안에서 글자가 크게 보입니다 */
+  function magnifier(box) {
+    if (!finePointer || reduceMotion || !box) return;
+    const S = 1.7, D = 230, Rr = D / 2;
+    const lens = document.createElement('div');
+    lens.className = 'lens';
+    lens.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(lens);
+    let clone = null, mx = 0, my = 0;
+    const cur = document.querySelector('.cursor');
+    const xTo = gsap.quickTo(lens, 'x', { duration: 0.35, ease: 'power3' }), yTo = gsap.quickTo(lens, 'y', { duration: 0.35, ease: 'power3' });
+    function place() {
+      if (!clone) return;
+      const r = box.getBoundingClientRect();
+      // 렌즈 중심 아래의 글자가 렌즈 가운데에 크게 오도록 복제본을 옮깁니다
+      const lx = gsap.getProperty(lens, 'x'), ly = gsap.getProperty(lens, 'y');
+      clone.style.transform = `translate(${Rr - (lx - r.left) * S}px, ${Rr - (ly - r.top) * S}px) scale(${S})`;
+    }
+    box.addEventListener('pointerenter', (e) => {
+      clone = box.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.classList.add('lens-text');
+      clone.style.width = box.getBoundingClientRect().width + 'px';
+      lens.replaceChildren(clone);
+      mx = e.clientX; my = e.clientY;
+      gsap.set(lens, { x: mx, y: my });
+      gsap.to(lens, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.6)' });
+      cur?.classList.add('is-lens-hide');
+    });
+    box.addEventListener('pointerleave', () => { gsap.to(lens, { scale: 0.4, opacity: 0, duration: 0.25 }); cur?.classList.remove('is-lens-hide'); });
+    box.addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; xTo(mx); yTo(my); });
+    gsap.ticker.add(place);
+    gsap.set(lens, { scale: 0.4, opacity: 0 });
   }
 })();
