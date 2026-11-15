@@ -179,27 +179,45 @@ if (renderer) {
   const pin = section.querySelector('.flip-pin');
   let accKey = '';
 
-  // 화면 크기에 맞춰 판이 위쪽 60% 안에 들어오도록 카메라 거리를 계산합니다
+  // 위 글과 아래 글 사이 빈 칸에 판과 점이 들어가도록 카메라 거리 · 높이를 계산합니다.
+  // 크기는 고정된 화면 칸(.flip-pin)으로 잽니다. (섹션 전체 높이로 재면 휴대폰에서 판이 납작해집니다)
   const camTarget = new THREE.Vector3();
+  const headEl = section.querySelector('.flip-head'), infoEl = section.querySelector('.flip-info');
   function resize() {
-    const w = section.clientWidth, h = section.clientHeight;
+    const w = pin.clientWidth, h = pin.clientHeight;
+    if (!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const hf = w < 760 ? 0.34 : 0.5;
-    let d = H / 2 / (t * hf);
+    const mob = w < 760;
+    // 아래 글은 작업마다 길이가 달라서 가장 높이 올라오는 경우로 맞춥니다
+    let infoTop = Infinity;
+    for (let k = 0; k < N; k++) { fill(k); infoTop = Math.min(infoTop, infoEl.offsetTop); }
+    fill(shown);
+    const dotGap = mob ? 16 : 20, dotH = 7;
+    const top = headEl.offsetTop + headEl.offsetHeight + (mob ? 22 : 26);
+    const bottom = infoTop - (mob ? 20 : 26) - dotH - dotGap;
+    const gapH = Math.max(90, bottom - top);
     const halfW = R * Math.sin(HALF), sag = R * (1 - Math.cos(HALF));
-    const maxWf = w < 760 ? 0.9 : 0.66;
-    const wf = halfW / ((d - sag) * t * camera.aspect);
-    if (wf > maxWf) d = halfW / (maxWf * t * camera.aspect) + sag;
+    const maxWf = mob ? 0.92 : 0.66;
+    const d = Math.max(
+      (H * h) / (2 * t * gapH) + sag,        // 빈 칸 높이 안에
+      halfW / (maxWf * t * camera.aspect) + sag, // 화면 너비 안에
+      H / 2 / (t * 0.5),                       // 큰 화면에서 너무 커지지 않게
+    );
     camera.position.set(0, 0, d);
     camTarget.set(0, 0, 0);
     camera.lookAt(camTarget);
-    book.position.y = (w < 760 ? 0.3 : 0.12) * t * d;
+    const halfPx = (H * h) / (4 * t * (d - sag));
+    const cy = Math.min((top + bottom) / 2, bottom - halfPx);
+    book.position.y = (1 - (2 * cy) / h) * t * d;
     camera.updateProjectionMatrix();
+    dots.style.top = Math.round(cy + halfPx + dotGap) + 'px';
+    dots.style.bottom = 'auto';
   }
   resize();
   addEventListener('resize', resize);
+  document.fonts?.ready.then(resize);
 
   let visible = true;
   new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0 }).observe(section);

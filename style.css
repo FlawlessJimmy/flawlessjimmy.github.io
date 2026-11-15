@@ -665,3 +665,34 @@ h1, h2, h3 { text-wrap: balance; }
 @media (max-width: 900px) { .mock-f { height: auto; max-width: 42%; } .ba-row .note-card { display: none; } .ba-col .mock-f, .ba-col .phone-f { height: auto; width: 100%; max-width: none; } .ba-col { width: 40%; height: auto; } }
 .ba-row .note-card { flex: 0 0 25%; max-width: none; }
 .ba-row { gap: 2.4%; }
+
+/* ---------- 휴대폰 (2026-11-16) ---------- */
+@media (max-width: 900px) {
+  /* 케이스: 위 화면 칸이 화면 맨 위까지 덮어, 위로 올라간 글은 그 뒤로 사라집니다 */
+  .case-stage { top: 0; height: calc(46svh + 72px); padding: 72px var(--pad) 0; margin: 0 calc(var(--pad) * -1); background: var(--bg); z-index: 3; }
+  .case-stage::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 40px; background: linear-gradient(var(--bg), transparent); pointer-events: none; }
+  .case-steps { padding: 0 0 14vh; }
+  .cs-step { min-height: calc(100svh - 46svh - 72px); padding-top: 34px; justify-content: flex-start; opacity: .18; }
+  /* 화면 칸 안에서 위 표시 · 아래 설명이 잘리지 않게 */
+  .cs-vis { gap: 10px; padding: 14px 12px 12px; justify-content: center; }
+  .cs-vis > .ph-row, .cs-vis > .ba-row { flex: 1 1 auto; min-height: 0; height: auto; }
+  .cs-vis .ph-row .phone-f, .cs-vis .ph-row .mock-f { height: 100%; width: auto; max-width: 46%; }
+  .cs-vis .ph-row.three .ph-col { height: 100%; width: auto; max-width: 31%; }
+  .cs-vis .ph-row.three .ph-col .phone-f { height: calc(100% - 26px); width: auto; max-width: none; }
+  .ba-tag { font-size: 11px; padding: 5px 12px; letter-spacing: .1em; flex: none; }
+  .cs-cap { flex: none; font-size: 12px; line-height: 1.45; text-align: center; max-width: 92%; }
+  .ba-row { gap: 2%; }
+  .ba-col { height: 100%; width: auto; gap: 8px; }
+  .ba-col .mock-f, .ba-col .phone-f { height: calc(100% - 34px); width: auto; max-width: none; }
+  .ba-arrow { font-size: 22px; }
+
+  /* 그 밖의 작업: 옆으로 넘기는 카드 */
+  .more-grid { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 calc(var(--pad) * -1); padding: 0 var(--pad) 6px; scroll-padding: 0 var(--pad); scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+  .more-grid::-webkit-scrollbar { display: none; }
+  .more-grid > .mw { flex: 0 0 84%; scroll-snap-align: start; }
+  .more-dots { display: flex; justify-content: center; gap: 7px; margin-top: 18px; }
+  .more-dots i { width: 7px; height: 7px; border-radius: 99px; background: rgba(255, 255, 255, .22); transition: width .35s var(--ease), background .3s; }
+  .more-dots i.is-on { width: 22px; background: var(--mint); }
+  .more-hint { display: block; margin: -2vh 0 16px; font-size: 13px; color: var(--muted); }
+}
+@media (min-width: 901px) { .more-dots, .more-hint { display: none; } }

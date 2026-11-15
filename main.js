@@ -97,6 +97,46 @@
       gsap.from($$('.case-nums > div', cs), { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, scrollTrigger: { trigger: $('.case-nums', cs), start: 'top 88%', once: true } });
     });
 
+    /* 휴대폰: 케이스 글이 멈추면 다음 글이 화면 칸 바로 아래에 딱 맞춰집니다 */
+    const mob = matchMedia('(max-width: 900px)');
+    let snapT = null, snapping = false;
+    window.lenis?.on('scroll', () => {
+      if (!mob.matches || snapping) return;
+      clearTimeout(snapT);
+      snapT = setTimeout(() => {
+        for (const cs of document.querySelectorAll('.case')) {
+          const stage = cs.querySelector('.case-stage'), steps = [...cs.querySelectorAll('.cs-step')];
+          const sr = stage.getBoundingClientRect();
+          if (sr.top > 1) continue;                      // 화면 칸이 아직 위에 붙지 않음
+          const line = sr.bottom + 8;
+          const last = steps[steps.length - 1].getBoundingClientRect();
+          if (last.bottom < line) continue;              // 이 케이스는 이미 지나감
+          let best = null;
+          steps.forEach((st) => { const d = st.getBoundingClientRect().top - line; if (best === null || Math.abs(d) < Math.abs(best)) best = d; });
+          if (best !== null && Math.abs(best) > 3 && Math.abs(best) < innerHeight * 0.42) {
+            snapping = true;
+            window.lenis.scrollTo(window.lenis.scroll + best, { duration: 0.6, easing: (x) => 1 - Math.pow(1 - x, 3), onComplete: () => { snapping = false; } });
+            setTimeout(() => { snapping = false; }, 900);
+          }
+          break;
+        }
+      }, 140);
+    });
+
+    /* 휴대폰: 그 밖의 작업 넘김 점 */
+    const mg = document.querySelector('.more-grid'), md = document.querySelector('.more-dots');
+    if (mg && md) {
+      const cards = [...mg.querySelectorAll('.mw')];
+      md.innerHTML = cards.map(() => '<i></i>').join('');
+      const upd = () => {
+        const w = cards[0].offsetWidth + 14;
+        const k = Math.min(cards.length - 1, Math.round(mg.scrollLeft / w));
+        [...md.children].forEach((d, i) => d.classList.toggle('is-on', i === k));
+      };
+      mg.addEventListener('scroll', upd, { passive: true });
+      upd();
+    }
+
     /* MORE: 카드가 차례로 */
     gsap.from('.mw', { y: 60, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.more-grid', start: 'top 82%', once: true } });
 
