@@ -2,13 +2,13 @@
 import * as THREE from 'three';
 
 const SLIDES = [
-  { img: 'shots/flip-off8.jpg', year: '2026.11', kind: '개인 프로젝트 · SaaS 제품 사이트', title: 'OFF8 업무 자동화 대시보드', desc: '직접 운영한 유료 PoC 3건을 바탕으로, 흩어진 엑셀이 대시보드가 되는 과정과 AI 상담을 제품 사이트로 보여 줍니다.', tags: ['사업 기획', '브랜딩', '구현'], more: '#case-off8', link: 'https://flawlessjimmy.github.io/off8/' },
+  { img: 'shots/flip-off8.jpg', year: '2026.11', kind: '개인 프로젝트 · SaaS 제품 사이트', title: 'OFF8 업무 자동화 대시보드', desc: '직접 운영한 유료 PoC 3건을 바탕으로, 흩어진 엑셀이 대시보드가 되는 과정과 AI 상담을 제품 사이트로 보여 줍니다.', tags: ['사업 기획', '브랜딩', '구현'], more: '#more', link: 'https://flawlessjimmy.github.io/off8/' },
   { img: 'shots/flip-tessera.jpg', year: '2026.11', kind: '개인 프로젝트 · 3D 커머스', title: 'Tessera 인테리어 자재 플랫폼', desc: '마루·타일·벽지를 방 안에 직접 깔아 보고 고르는 자재 플랫폼입니다. 회전문처럼 넘어가는 3D 방으로 시작합니다.', tags: ['Three.js', 'GSAP', '기획 · 디자인'], more: '#more', link: 'https://flawlessjimmy.github.io/tessera/' },
   { img: 'shots/flip-maoxga.jpg', year: '2026', kind: '클라이언트 · 카페24 자사몰', title: '묘향가 자사몰 리뉴얼', desc: '카페24 자사몰 전 페이지를 모바일 우선으로 다시 설계하고 구현했습니다. 회원·장바구니·네이버페이·실시간 상담까지 연결합니다.', tags: ['Cafe24', 'UX 설계', '구현'], more: '#more', link: 'https://www.maoxga.com/' },
   { img: 'shots/flip-kanto.jpg', year: '2026', kind: '클라이언트 · 업무 시스템', title: 'KANTO 발주 자동화', desc: '엑셀 수작업 대조를 웹 흐름으로 바꿨습니다. 자동 매칭률 98%, 월간 리포트 생성 시간은 85초에서 4초로 줄었습니다.', tags: ['Web App', '엑셀 변환', 'Cloudflare'], more: '#more', link: 'https://kanto-order-server.pages.dev' },
   { img: 'shots/flip-h2b.jpg', year: '2026', kind: '클라이언트 · 경영 대시보드', title: 'H2B 운영 대시보드', desc: '월 8천만 원대 매출을 다루는 대시보드를 설계부터 운영까지 맡았습니다. AS 칸반, AI 상담 큐, 매출·순이익 계산을 한곳에 모았습니다.', tags: ['FastAPI', 'PostgreSQL', '운영'], more: '#case-h2b', link: 'https://h2b-3cr.pages.dev' },
   { img: 'shots/flip-ticketeer.jpg', year: '2025', kind: 'EarthMera · New York', title: 'Ticketeer 이벤트 플랫폼', desc: '앱 설치 없이 QR로 참여하는 이벤트 플랫폼입니다. UKIS 2025(500명, 21개 부스)에 첫 상용 납품했고, 미션 완료율 90%를 기록했습니다.', tags: ['0 → 1 설계', '참가자 · 부스 · 주최자', '상용 납품'], more: '#case-ticketeer', link: '' },
-  { img: 'shots/flip-earthmera.jpg', year: '2024 — 2025', kind: 'EarthMera · Lead Product Designer', title: 'EarthMera, 세 개의 프로덕트', desc: '뉴욕 친환경 스타트업의 유일한 디자이너로 탄소 기록 앱, 이벤트 플랫폼, 링크인바이오 ZIGU를 기획부터 핸드오프까지 맡았습니다.', tags: ['신규 가입 +1,000', '미션 완료 90%', '구독 +100'], more: '#more', link: '' },
+  { img: 'shots/flip-earthmera.jpg', year: '2024 — 2025', kind: 'EarthMera · Lead Product Designer', title: 'EarthMera, 세 개의 프로덕트', desc: '뉴욕 친환경 스타트업의 유일한 디자이너로 탄소 기록 앱, 이벤트 플랫폼, 링크인바이오 ZIGU를 기획부터 핸드오프까지 맡았습니다.', tags: ['신규 가입 +1,000', '미션 완료 90%', '구독 +100'], more: '#case-earthmera', link: '' },
 ];
 
 // 작업마다 바탕에 번지는 빛의 색
@@ -187,7 +187,7 @@ if (renderer) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const hf = w < 760 ? 0.36 : 0.56;
+    const hf = w < 760 ? 0.34 : 0.5;
     let d = H / 2 / (t * hf);
     const halfW = R * Math.sin(HALF), sag = R * (1 - Math.cos(HALF));
     const maxWf = w < 760 ? 0.9 : 0.66;
@@ -196,7 +196,7 @@ if (renderer) {
     camera.position.set(0, 0, d);
     camTarget.set(0, 0, 0);
     camera.lookAt(camTarget);
-    book.position.y = (w < 760 ? 0.36 : 0.16) * t * d;
+    book.position.y = (w < 760 ? 0.3 : 0.12) * t * d;
     camera.updateProjectionMatrix();
   }
   resize();

@@ -84,7 +84,7 @@
           if (i === k) {
             v.classList.add('is-on');
             gsap.fromTo(v, { opacity: 0, y: 40 * dir }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', overwrite: true });
-            gsap.fromTo($$('.phone-f, .br-f, .res-grid > *, .fix-list > div, .cs-cap, .ph-labels', v), { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.05, overwrite: true });
+            gsap.fromTo($$('.phone-f, .br-f, .res-grid > *, .kpi-pair > div, .note-card, .res-big.solo, .cs-cap, .ph-labels', v), { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.05, overwrite: true });
           } else if (v.classList.contains('is-on')) {
             v.classList.remove('is-on');
             gsap.to(v, { opacity: 0, y: -30 * dir, duration: 0.4, ease: 'power2.in', overwrite: true });
