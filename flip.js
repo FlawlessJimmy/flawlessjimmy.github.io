@@ -1,4 +1,4 @@
-// 랜딩: 휘어진 화면 한 장씩. 스크롤하면 책장처럼 가운데를 접는 선으로 반이 들려 넘어갑니다 (최근 작업 → EarthMera)
+// 랜딩: 휘어진 화면 한 장씩. 스크롤하면 책을 넘기듯 오른쪽 반장이 가운데 접는 선을 축으로 들려 왼쪽으로 넘어갑니다 (최근 작업 → EarthMera)
 import * as THREE from 'three';
 
 const SLIDES = [
@@ -11,6 +11,8 @@ const SLIDES = [
   { img: 'shots/flip-earthmera.jpg', year: '2024 — 2025', kind: 'EarthMera · Lead Product Designer', title: 'EarthMera, 세 개의 프로덕트', desc: '뉴욕 친환경 스타트업의 유일한 디자이너로 탄소 기록 앱, 이벤트 플랫폼, 링크인바이오 ZIGU를 기획부터 핸드오프까지 맡았습니다.', tags: ['신규 가입 +1,000', '미션 완료 90%', '구독 +100'], more: '#more', link: '' },
 ];
 
+// 작업마다 바탕에 번지는 빛의 색
+const ACC = [[99, 54, 232], [255, 111, 15], [176, 196, 92], [60, 123, 255], [60, 207, 230], [163, 255, 60], [98, 240, 221]];
 const $ = (s) => document.querySelector(s);
 const N = SLIDES.length;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -110,12 +112,12 @@ if (renderer) {
   }
 
   // 정적인 왼쪽·오른쪽 판 + 넘어가는 한 장(앞면·뒷면)
-  const gL = halfGeo(0.5, 0), gR = halfGeo(0.5, 1), gLeafF = halfGeo(0.5, 0), gLeafB = halfGeo(0.5, 1);
+  const gL = halfGeo(0.5, 0), gR = halfGeo(0.5, 1), gLeafF = halfGeo(0.5, 1), gLeafB = halfGeo(0.5, 0);
   shape(gL, -1); shape(gR, 1);
   const mat = (side) => new THREE.MeshBasicMaterial({ transparent: true, side, color: 0x111417 });
   const mL = new THREE.Mesh(gL, mat(THREE.DoubleSide)), mR = new THREE.Mesh(gR, mat(THREE.DoubleSide));
-  // 들리는 장: 처음엔 뒷면 쪽이 보이도록 감긴 면이라 앞(A)은 BackSide, 넘어간 뒤(B)는 FrontSide로 보입니다
-  const leafF = new THREE.Mesh(gLeafF, mat(THREE.BackSide)), leafB = new THREE.Mesh(gLeafB, mat(THREE.FrontSide));
+  // 넘기는 장: 오른쪽에 누운 동안은 앞면(A의 오른쪽), 왼쪽에 내려앉으면 뒷면(B의 왼쪽)이 보입니다
+  const leafF = new THREE.Mesh(gLeafF, mat(THREE.FrontSide)), leafB = new THREE.Mesh(gLeafB, mat(THREE.BackSide));
   leafF.renderOrder = 2; leafB.renderOrder = 2;
   book.add(mL, mR, leafF, leafB);
   // 접는 선을 따라 생기는 얇은 그림자
@@ -144,25 +146,39 @@ if (renderer) {
     return t;
   });
 
-  // 오른쪽 판의 바깥 가장자리 쪽 절반이 (넘김 각도에 따라) 들리는 한 장의 모양
+  // 넘기는 장의 모양: 접는 선에서 바깥 가장자리까지 조금씩 방향을 바꾸며 이어 붙입니다.
+  // 가장자리가 접는 선보다 살짝 늦게 따라와 종이가 휘듯 말리는 느낌이 납니다.
+  const DS = (R * HALF) / SEG, CURL = 0.6;
   function leafShape(theta) {
+    const flipC = Math.cos(theta), lag = CURL * Math.sin(theta);
+    let x = 0, z = 0;
+    const pts = [[0, 0]];
+    for (let k = 1; k <= SEG; k++) {
+      const sMid = (k - 0.5) * DS, t = (k - 0.5) / SEG;
+      // 누운 상태의 곡면 방향(+x에서 화면 쪽으로 휨) · 넘김 각도 · 가장자리일수록 늦게 따라옴
+      const d = (sMid / R) * flipC + (theta - lag * t);
+      x += Math.cos(d) * DS; z += Math.sin(d) * DS;
+      pts.push([x, z]);
+    }
     [gLeafF, gLeafB].forEach((g) => {
       const p = g.attributes.position;
-      const c = Math.cos(theta), s = Math.sin(theta);
-      for (let k = 0; k <= SEG; k++) {
-        const a = (k / SEG) * HALF;
-        // 왼쪽에 누운 상태의 점(접는 선 기준)
-        const lx = -R * Math.sin(a), lz = R * (1 - Math.cos(a)) * c; // 휘는 정도가 넘김에 따라 뒤집힘
-        // 접는 선을 축으로 theta만큼 회전 (왼쪽 → 위로 들림 → 오른쪽)
-        const x = lx * c + lz * s, z = -lx * s + lz * c;
-        // 종이처럼 살짝 휘는 느낌
-        const lift = Math.sin(theta) * Math.sin((k / SEG) * Math.PI * 0.5) * 0.25;
-        for (let r = 0; r < 2; r++) { const j = k * 2 + r; p.setX(j, x); p.setZ(j, z + lift + 0.006); }
-      }
+      for (let k = 0; k <= SEG; k++) for (let r = 0; r < 2; r++) { const j = k * 2 + r; p.setX(j, pts[k][0]); p.setZ(j, pts[k][1] + 0.006); }
       p.needsUpdate = true;
       g.computeBoundingSphere();
     });
   }
+
+  // 바탕: 천천히 떠다니는 빛 알갱이 (넘길 때 바람처럼 함께 휩쓸립니다)
+  const PC = 320, pp = new Float32Array(PC * 3), pseed = new Float32Array(PC);
+  for (let k = 0; k < PC; k++) { pp[k * 3] = (Math.random() - 0.5) * 22; pp[k * 3 + 1] = (Math.random() - 0.5) * 12; pp[k * 3 + 2] = -1.5 - Math.random() * 9; pseed[k] = Math.random() * 10; }
+  const pg = new THREE.BufferGeometry();
+  pg.setAttribute('position', new THREE.BufferAttribute(pp, 3));
+  const dotTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+  const pmat = new THREE.PointsMaterial({ size: 0.12, map: dotTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.75, color: 0x62f0dd });
+  const dust = new THREE.Points(pg, pmat);
+  scene.add(dust);
+  const pin = section.querySelector('.flip-pin');
+  let accKey = '';
 
   // 화면 크기에 맞춰 판이 위쪽 60% 안에 들어오도록 카메라 거리를 계산합니다
   const camTarget = new THREE.Vector3();
@@ -198,29 +214,51 @@ if (renderer) {
     if (!visible) return;
     const intro = reduced ? 1 : Math.min(1, (performance.now() - start) / 1300);
     const e = 1 - Math.pow(1 - intro, 3);
-    pos += (target - pos) * (reduced ? 1 : 0.08);
+    const prev = pos;
+    pos += (target - pos) * (reduced ? 1 : 0.06);
     if (Math.abs(target - pos) < 1e-4) pos = target;
-    const i = Math.min(N - 1, Math.floor(pos + 1e-6)), f = Math.min(1, pos - i);
+    // 거의 다 넘어갔거나 거의 안 넘어간 상태는 온전한 한 장으로 봅니다 (반쪽만 바뀌어 보이는 틈 방지)
+    let i = Math.min(N - 1, Math.floor(pos)), f = Math.min(1, Math.max(0, pos - i));
+    if (f > 0.995) { i = Math.min(N - 1, i + 1); f = 0; }
+    if (f < 0.005) f = 0;
     const A = tex[i], B = tex[Math.min(N - 1, i + 1)];
-    // 넘김: 왼쪽 반장(A의 왼쪽)이 접는 선을 축으로 들려 오른쪽으로 넘어가고, 뒷면에는 B의 오른쪽이 있습니다
-    const theta = f * Math.PI;
-    mL.material.map = f > 0 ? B : A; // 들린 장 아래로 B의 왼쪽이 드러납니다
-    mR.material.map = A;              // 아직 덮이지 않은 오른쪽은 A
+    // 넘김: 오른쪽 반장(A의 오른쪽)이 접는 선을 축으로 들려 왼쪽으로 넘어가고, 뒷면에는 B의 왼쪽이 있습니다
+    const fe = f * f * (3 - 2 * f); // 천천히 들리고, 가운데서 빠르고, 천천히 내려앉습니다
+    const theta = fe * Math.PI;
+    mR.material.map = f > 0 ? B : A; // 들린 장 아래로 B의 오른쪽이 드러납니다
+    mL.material.map = A;              // 아직 덮이지 않은 왼쪽은 A
     leafF.material.map = A; leafB.material.map = B;
     [mL, mR, leafF, leafB].forEach((m) => { m.material.needsUpdate = m.material.userData.map !== m.material.map; m.material.userData.map = m.material.map; });
     leafShape(theta);
-    leafF.visible = leafB.visible = f > 0.001;
+    leafF.visible = leafB.visible = f > 0;
     // 밝기: 들린 장은 세워질수록 어둡게, 그 아래 드러나는 면은 그림자에서 밝아집니다
     const ready = A.userData.ready ? 1 : 0.06;
     const lit = Math.abs(Math.cos(theta));
     bright(leafF, (0.35 + 0.65 * lit) * e * ready);
     bright(leafB, (0.35 + 0.65 * lit) * e * ready);
-    bright(mL, (f > 0 ? 0.45 + 0.55 * Math.min(1, f * 1.6) : 1) * e * ready);
-    bright(mR, (1 - 0.5 * Math.max(0, f - 0.5) * 2) * e * ready);
+    bright(mR, (f > 0 ? 0.42 + 0.58 * Math.min(1, fe * 1.5) : 1) * e * ready);
+    bright(mL, (1 - 0.5 * Math.max(0, fe - 0.5) * 2) * e * ready);
+    // 바탕 빛: 두 작업의 색 사이를 넘김에 맞춰 섞습니다
+    const c0 = ACC[i], c1 = ACC[Math.min(N - 1, i + 1)];
+    const rgb = c0.map((v, k) => Math.round(v + (c1[k] - v) * fe));
+    const key = rgb.join(',');
+    if (key !== accKey) { accKey = key; pin.style.setProperty('--acc', key); pmat.color.setRGB(0.55 + rgb[0] / 570, 0.55 + rgb[1] / 570, 0.55 + rgb[2] / 570); }
+    // 빛 알갱이: 천천히 떠오르고, 넘기는 속도만큼 옆으로 휩쓸립니다
+    const now = performance.now() / 1000, vel = (pos - prev) * 60;
+    const pa = pg.attributes.position;
+    for (let k = 0; k < PC; k++) {
+      let y = pa.getY(k) + 0.0035 + Math.sin(now * 0.6 + pseed[k]) * 0.002;
+      if (y > 6) y = -6;
+      let x = pa.getX(k) - vel * 0.05 * (1 + (pa.getZ(k) + 10) * 0.08);
+      if (x < -11) x += 22; if (x > 11) x -= 22;
+      pa.setXY(k, x, y);
+    }
+    pa.needsUpdate = true;
+    pmat.opacity = 0.55 + Math.min(0.35, Math.abs(vel) * 0.6);
     spine.material.opacity = 0.35 * Math.sin(theta);
     // 등장 + 마우스에 따라 살짝 기울기
     smx += (mx - smx) * 0.05; smy += (my - smy) * 0.05;
-    book.rotation.y = (1 - e) * -0.6 + smx * 0.18;
+    book.rotation.y = (1 - e) * -0.6 + smx * 0.18 + Math.sin(fe * Math.PI) * 0.06;
     book.rotation.x = smy * 0.08;
     book.scale.setScalar(0.88 + 0.12 * e);
     renderer.render(scene, camera);
@@ -256,7 +294,7 @@ function setupScroll() {
     if (y <= st.start + 2 || y >= st.end - 2) return;
     t = setTimeout(() => {
       const i = Math.round(target);
-      if (Math.abs(target - i) > 0.01) window.lenis.scrollTo(st.start + (i / (N - 1)) * (st.end - st.start), { duration: 1, easing: (x) => 1 - Math.pow(1 - x, 3) });
+      if (Math.abs(target - i) > 0.01) window.lenis.scrollTo(st.start + (i / (N - 1)) * (st.end - st.start), { duration: 1.3, easing: (x) => 1 - Math.pow(1 - x, 3) });
     }, 180);
   });
   dots.addEventListener('click', (e) => {

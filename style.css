@@ -612,3 +612,7 @@ h2.kr { letter-spacing: -.03em; line-height: 1.22; }
 .rs-grid p b { color: var(--fg); margin-right: 8px; }
 @media (max-width: 900px) { .rs-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
 @media (max-width: 900px) { .ph-row.three .phone-f { height: auto; width: 29%; } .ph-row .phone-f { max-width: 42%; height: auto; } .ph-row .phone-f.big { max-width: 46%; } }
+
+/* 랜딩 바탕: 작업 색으로 번지는 빛 + 바닥 반사 */
+.flip-pin { --acc: 99, 54, 232; background: radial-gradient(55% 48% at 50% 40%, rgba(var(--acc), .22), transparent 70%), radial-gradient(38% 16% at 50% 80%, rgba(var(--acc), .14), transparent 70%), radial-gradient(120% 80% at 50% 120%, rgba(var(--acc), .08), transparent 60%), var(--bg); }
+.flip-pin::before { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1.3px); background-size: 26px 26px; -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%); mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%); }
