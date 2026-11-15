@@ -1,20 +1,20 @@
-// 랜딩: 휘어진 화면 한 장씩, 스크롤하면 원통을 따라 다음 작업이 넘어옵니다 (최근 작업 → EarthMera)
+// 랜딩: 휘어진 화면 한 장씩. 스크롤하면 책장처럼 가운데를 접는 선으로 반이 들려 넘어갑니다 (최근 작업 → EarthMera)
 import * as THREE from 'three';
 
 const SLIDES = [
-  { img: 'shots/flip-off8.jpg', year: '2026.11', kind: '개인 프로젝트 · SaaS 제품 사이트', title: 'OFF8 업무 자동화 대시보드', desc: '직접 운영한 유료 PoC 3건을 바탕으로, 흩어진 엑셀이 대시보드가 되는 과정과 AI 상담을 제품 사이트로 보여 줍니다.', tags: ['사업 기획', '브랜딩', '구현'], link: 'https://flawlessjimmy.github.io/off8/' },
-  { img: 'shots/flip-tessera.jpg', year: '2026.11', kind: '개인 프로젝트 · 3D 커머스', title: 'Tessera 인테리어 자재 플랫폼', desc: '마루·타일·벽지를 방 안에 직접 깔아 보고 고르는 자재 플랫폼입니다. 회전문처럼 넘어가는 3D 방으로 시작합니다.', tags: ['Three.js', 'GSAP', '기획 · 디자인'], link: 'https://flawlessjimmy.github.io/tessera/' },
-  { img: 'shots/flip-maoxga.jpg', year: '2026', kind: '클라이언트 · 카페24 자사몰', title: '묘향가 자사몰 리뉴얼', desc: '카페24 자사몰 전 페이지를 모바일 우선으로 다시 설계하고 구현했습니다. 회원·장바구니·네이버페이·실시간 상담까지 연결합니다.', tags: ['Cafe24', 'UX 설계', '구현'], link: 'https://www.maoxga.com/' },
-  { img: 'shots/flip-kanto.jpg', year: '2026', kind: '클라이언트 · 업무 시스템', title: 'KANTO 발주 자동화', desc: '엑셀 수작업 대조를 웹 흐름으로 바꿨습니다. 자동 매칭률 98%, 월간 리포트 생성 시간은 85초에서 4초로 줄었습니다.', tags: ['Web App', '엑셀 변환', 'Cloudflare'], link: 'https://kanto-order-server.pages.dev' },
-  { img: 'shots/flip-h2b.jpg', year: '2026', kind: '클라이언트 · 경영 대시보드', title: 'H2B 운영 대시보드', desc: '월 8천만 원대 매출을 다루는 대시보드를 설계부터 운영까지 맡았습니다. AS 칸반, AI 상담 큐, 매출·순이익 계산을 한곳에 모았습니다.', tags: ['FastAPI', 'PostgreSQL', '운영'], link: 'https://h2b-3cr.pages.dev' },
-  { img: 'shots/flip-ticketeer.jpg', year: '2025', kind: 'EarthMera · New York', title: 'Ticketeer 이벤트 플랫폼', desc: '앱 설치 없이 QR로 참여하는 이벤트 플랫폼입니다. UKIS 2025(500명, 21개 부스)에 첫 상용 납품했고, 미션 완료율 90%를 기록했습니다.', tags: ['0 → 1 설계', '참가자 · 부스 · 주최자', '상용 납품'], link: '' },
-  { img: 'shots/flip-earthmera.jpg', year: '2024 — 2025', kind: 'EarthMera · Lead Product Designer', title: 'EarthMera, 세 개의 프로덕트', desc: '뉴욕 친환경 스타트업의 유일한 디자이너로 탄소 기록 앱, 이벤트 플랫폼, 링크인바이오 ZIGU를 기획부터 핸드오프까지 맡았습니다.', tags: ['신규 가입 +1,000', '미션 완료 90%', '구독 +100'], link: '' },
+  { img: 'shots/flip-off8.jpg', year: '2026.11', kind: '개인 프로젝트 · SaaS 제품 사이트', title: 'OFF8 업무 자동화 대시보드', desc: '직접 운영한 유료 PoC 3건을 바탕으로, 흩어진 엑셀이 대시보드가 되는 과정과 AI 상담을 제품 사이트로 보여 줍니다.', tags: ['사업 기획', '브랜딩', '구현'], more: '#case-off8', link: 'https://flawlessjimmy.github.io/off8/' },
+  { img: 'shots/flip-tessera.jpg', year: '2026.11', kind: '개인 프로젝트 · 3D 커머스', title: 'Tessera 인테리어 자재 플랫폼', desc: '마루·타일·벽지를 방 안에 직접 깔아 보고 고르는 자재 플랫폼입니다. 회전문처럼 넘어가는 3D 방으로 시작합니다.', tags: ['Three.js', 'GSAP', '기획 · 디자인'], more: '#more', link: 'https://flawlessjimmy.github.io/tessera/' },
+  { img: 'shots/flip-maoxga.jpg', year: '2026', kind: '클라이언트 · 카페24 자사몰', title: '묘향가 자사몰 리뉴얼', desc: '카페24 자사몰 전 페이지를 모바일 우선으로 다시 설계하고 구현했습니다. 회원·장바구니·네이버페이·실시간 상담까지 연결합니다.', tags: ['Cafe24', 'UX 설계', '구현'], more: '#more', link: 'https://www.maoxga.com/' },
+  { img: 'shots/flip-kanto.jpg', year: '2026', kind: '클라이언트 · 업무 시스템', title: 'KANTO 발주 자동화', desc: '엑셀 수작업 대조를 웹 흐름으로 바꿨습니다. 자동 매칭률 98%, 월간 리포트 생성 시간은 85초에서 4초로 줄었습니다.', tags: ['Web App', '엑셀 변환', 'Cloudflare'], more: '#more', link: 'https://kanto-order-server.pages.dev' },
+  { img: 'shots/flip-h2b.jpg', year: '2026', kind: '클라이언트 · 경영 대시보드', title: 'H2B 운영 대시보드', desc: '월 8천만 원대 매출을 다루는 대시보드를 설계부터 운영까지 맡았습니다. AS 칸반, AI 상담 큐, 매출·순이익 계산을 한곳에 모았습니다.', tags: ['FastAPI', 'PostgreSQL', '운영'], more: '#case-h2b', link: 'https://h2b-3cr.pages.dev' },
+  { img: 'shots/flip-ticketeer.jpg', year: '2025', kind: 'EarthMera · New York', title: 'Ticketeer 이벤트 플랫폼', desc: '앱 설치 없이 QR로 참여하는 이벤트 플랫폼입니다. UKIS 2025(500명, 21개 부스)에 첫 상용 납품했고, 미션 완료율 90%를 기록했습니다.', tags: ['0 → 1 설계', '참가자 · 부스 · 주최자', '상용 납품'], more: '#case-ticketeer', link: '' },
+  { img: 'shots/flip-earthmera.jpg', year: '2024 — 2025', kind: 'EarthMera · Lead Product Designer', title: 'EarthMera, 세 개의 프로덕트', desc: '뉴욕 친환경 스타트업의 유일한 디자이너로 탄소 기록 앱, 이벤트 플랫폼, 링크인바이오 ZIGU를 기획부터 핸드오프까지 맡았습니다.', tags: ['신규 가입 +1,000', '미션 완료 90%', '구독 +100'], more: '#more', link: '' },
 ];
 
 const $ = (s) => document.querySelector(s);
 const N = SLIDES.length;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const R = 4.2, ARC = 1.2, STEP = (96 * Math.PI) / 180;
+const R = 5.2, ARC = 1.0; // 원통 반지름 · 화면이 차지하는 각도(라디안)
 
 const section = $('#top');
 const canvas = $('#flipGl');
@@ -26,7 +26,7 @@ try {
 }
 
 // ---------- 글 정보 ----------
-const no = $('#fiNo'), kind = $('#fiKind'), title = $('#fiTitle'), desc = $('#fiDesc'), year = $('#fiYear'), tags = $('#fiTags'), link = $('#fiLink');
+const no = $('#fiNo'), kind = $('#fiKind'), title = $('#fiTitle'), desc = $('#fiDesc'), year = $('#fiYear'), tags = $('#fiTags'), link = $('#fiLink'), more = $('#fiMore');
 $('#fiTotal').textContent = '/ ' + String(N).padStart(2, '0');
 const dots = $('#flipDots');
 dots.innerHTML = SLIDES.map((s, i) => `<button type="button" aria-label="${s.title}" data-i="${i}"></button>`).join('');
@@ -38,6 +38,7 @@ function fill(i) {
   tags.innerHTML = s.tags.map((t) => `<span>${t}</span>`).join('');
   link.hidden = !s.link;
   if (s.link) link.href = s.link;
+  more.setAttribute('href', s.more);
   [...dots.children].forEach((d, k) => d.classList.toggle('is-on', k === i));
   if (fallback) fallback.src = s.img;
 }
@@ -54,103 +55,174 @@ function show(i) {
     .add(() => fill(shown))
     .fromTo(rows, { yPercent: 60 * dir, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.04 });
 }
+more.addEventListener('click', (e) => {
+  const t = document.querySelector(more.getAttribute('href'));
+  if (!t) return;
+  e.preventDefault();
+  window.lenis ? window.lenis.scrollTo(t, { duration: 1.6 }) : t.scrollIntoView({ behavior: 'smooth' });
+});
 
-// ---------- 3D: 원통 위의 휘어진 화면들 ----------
+// ---------- 3D: 책장처럼 넘어가는 휘어진 화면 ----------
 let pos = 0, target = 0;
 if (renderer) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-  const ring = new THREE.Group();
-  scene.add(ring);
+  const book = new THREE.Group();
+  scene.add(book);
+  const HALF = ARC / 2, SEG = 40;
+  const H = ARC * R * 0.625;
 
-  // 평평한 판을 원통 곡면으로 휘기 (가장자리가 화면 쪽으로 다가오는 오목한 모양)
-  const W = ARC * R, H = W * 0.625;
-  const geo = new THREE.PlaneGeometry(W, H, 64, 1);
-  const p = geo.attributes.position;
-  for (let k = 0; k < p.count; k++) {
-    const a = p.getX(k) / R;
-    p.setX(k, R * Math.sin(a));
-    p.setZ(k, -R * Math.cos(a));
+  // 반쪽 판: 접는 선(가운데)에서 바깥쪽 가장자리까지. side -1 = 왼쪽, +1 = 오른쪽
+  // 좌표는 접는 선 기준: x = side·R·sin(a), z = R·(1−cos a) (가장자리가 화면 쪽으로 다가오는 오목한 모양)
+  function halfGeo(uFrom, uTo) {
+    const g = new THREE.BufferGeometry();
+    const pos = new Float32Array((SEG + 1) * 2 * 3), uv = new Float32Array((SEG + 1) * 2 * 2), idx = [];
+    for (let k = 0; k <= SEG; k++) {
+      const t = k / SEG, u = uFrom + (uTo - uFrom) * t;
+      for (let r = 0; r < 2; r++) {
+        const j = k * 2 + r;
+        uv[j * 2] = u; uv[j * 2 + 1] = r;
+        pos[j * 3 + 1] = (r - 0.5) * H;
+      }
+      if (k < SEG) { const a = k * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    }
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    g.setIndex(idx);
+    return g;
   }
-  geo.computeVertexNormals();
+  // 반쪽 판의 모양: 접는 선에서 t(0~1)만큼 떨어진 점. theta = 넘김 각도(0 왼쪽에 누움 ~ π 오른쪽에 누움)
+  function shape(g, side, theta = 0) {
+    const p = g.attributes.position;
+    const c = Math.cos(theta), s = Math.sin(theta);
+    for (let k = 0; k <= SEG; k++) {
+      const a = (k / SEG) * HALF;
+      const x0 = side * R * Math.sin(a);
+      const z0 = R * (1 - Math.cos(a)) * (side < 0 ? c : 1); // 넘어가는 동안 휘는 방향이 뒤집힙니다
+      // 접는 선(세로축)을 중심으로 회전
+      const x = side < 0 ? x0 * c + z0 * s * 0 : x0, z = side < 0 ? -x0 * s + z0 : z0;
+      for (let r = 0; r < 2; r++) { const j = k * 2 + r; p.setX(j, x); p.setZ(j, z + (side < 0 ? 0.002 : 0)); }
+    }
+    p.needsUpdate = true;
+    g.computeBoundingSphere();
+  }
+
+  // 정적인 왼쪽·오른쪽 판 + 넘어가는 한 장(앞면·뒷면)
+  const gL = halfGeo(0.5, 0), gR = halfGeo(0.5, 1), gLeafF = halfGeo(0.5, 0), gLeafB = halfGeo(0.5, 1);
+  shape(gL, -1); shape(gR, 1);
+  const mat = (side) => new THREE.MeshBasicMaterial({ transparent: true, side, color: 0x111417 });
+  const mL = new THREE.Mesh(gL, mat(THREE.DoubleSide)), mR = new THREE.Mesh(gR, mat(THREE.DoubleSide));
+  // 들리는 장: 처음엔 뒷면 쪽이 보이도록 감긴 면이라 앞(A)은 BackSide, 넘어간 뒤(B)는 FrontSide로 보입니다
+  const leafF = new THREE.Mesh(gLeafF, mat(THREE.BackSide)), leafB = new THREE.Mesh(gLeafB, mat(THREE.FrontSide));
+  leafF.renderOrder = 2; leafB.renderOrder = 2;
+  book.add(mL, mR, leafF, leafB);
+  // 접는 선을 따라 생기는 얇은 그림자
+  const spine = new THREE.Mesh(new THREE.PlaneGeometry(0.06, H), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0 }));
+  spine.position.z = 0.004; spine.renderOrder = 3;
+  book.add(spine);
 
   // 모서리를 둥글게 깎은 이미지 텍스처
   const loader = new THREE.ImageLoader();
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
-  const meshes = SLIDES.map((s, i) => {
+  const tex = SLIDES.map((s) => {
     const cv = document.createElement('canvas');
     cv.width = 1600; cv.height = 1000;
-    const tex = new THREE.CanvasTexture(cv);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = maxAniso;
-    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, color: 0x111417 });
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = maxAniso;
+    t.userData.ready = false;
     loader.load(s.img, (img) => {
       const g = cv.getContext('2d');
-      g.clearRect(0, 0, 1600, 1000);
-      g.save();
-      g.beginPath();
-      g.roundRect(4, 4, 1592, 992, 46);
-      g.clip();
-      g.drawImage(img, 0, 0, 1600, 1000);
-      g.restore();
-      g.lineWidth = 3;
-      g.strokeStyle = 'rgba(255,255,255,.18)';
-      g.beginPath(); g.roundRect(5.5, 5.5, 1589, 989, 45); g.stroke();
-      tex.needsUpdate = true;
-      mat.userData.ready = true;
+      g.save(); g.beginPath(); g.roundRect(4, 4, 1592, 992, 40); g.clip();
+      g.drawImage(img, 0, 0, 1600, 1000); g.restore();
+      g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,.16)';
+      g.beginPath(); g.roundRect(5.5, 5.5, 1589, 989, 39); g.stroke();
+      t.needsUpdate = true; t.userData.ready = true;
     });
-    const m = new THREE.Mesh(geo, mat);
-    const pivot = new THREE.Group();
-    pivot.rotation.y = -i * STEP; // 다음 작업은 오른쪽에서 기다립니다
-    pivot.add(m);
-    ring.add(pivot);
-    return m;
+    return t;
   });
 
+  // 오른쪽 판의 바깥 가장자리 쪽 절반이 (넘김 각도에 따라) 들리는 한 장의 모양
+  function leafShape(theta) {
+    [gLeafF, gLeafB].forEach((g) => {
+      const p = g.attributes.position;
+      const c = Math.cos(theta), s = Math.sin(theta);
+      for (let k = 0; k <= SEG; k++) {
+        const a = (k / SEG) * HALF;
+        // 왼쪽에 누운 상태의 점(접는 선 기준)
+        const lx = -R * Math.sin(a), lz = R * (1 - Math.cos(a)) * c; // 휘는 정도가 넘김에 따라 뒤집힘
+        // 접는 선을 축으로 theta만큼 회전 (왼쪽 → 위로 들림 → 오른쪽)
+        const x = lx * c + lz * s, z = -lx * s + lz * c;
+        // 종이처럼 살짝 휘는 느낌
+        const lift = Math.sin(theta) * Math.sin((k / SEG) * Math.PI * 0.5) * 0.25;
+        for (let r = 0; r < 2; r++) { const j = k * 2 + r; p.setX(j, x); p.setZ(j, z + lift + 0.006); }
+      }
+      p.needsUpdate = true;
+      g.computeBoundingSphere();
+    });
+  }
+
   // 화면 크기에 맞춰 판이 위쪽 60% 안에 들어오도록 카메라 거리를 계산합니다
-  let intro = reduced ? 1 : 0;
+  const camTarget = new THREE.Vector3();
   function resize() {
     const w = section.clientWidth, h = section.clientHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const hf = w < 760 ? 0.36 : 0.56; // 판 높이가 화면 높이에서 차지하는 비율
+    const hf = w < 760 ? 0.36 : 0.56;
     let d = H / 2 / (t * hf);
-    const halfW = R * Math.sin(ARC / 2), sag = R * (1 - Math.cos(ARC / 2));
+    const halfW = R * Math.sin(HALF), sag = R * (1 - Math.cos(HALF));
     const maxWf = w < 760 ? 0.9 : 0.66;
     const wf = halfW / ((d - sag) * t * camera.aspect);
     if (wf > maxWf) d = halfW / (maxWf * t * camera.aspect) + sag;
-    camera.position.set(0, 0, d - R);
-    camera.lookAt(0, 0, -R);
-    // 판 중심을 화면 위쪽(40%)으로 올립니다
-    ring.position.y = (w < 760 ? 0.36 : 0.16) * t * d;
+    camera.position.set(0, 0, d);
+    camTarget.set(0, 0, 0);
+    camera.lookAt(camTarget);
+    book.position.y = (w < 760 ? 0.36 : 0.16) * t * d;
     camera.updateProjectionMatrix();
   }
   resize();
   addEventListener('resize', resize);
 
-  const io = new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0 });
   let visible = true;
-  io.observe(section);
+  new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0 }).observe(section);
   const start = performance.now();
+  let mx = 0, my = 0, smx = 0, smy = 0;
+  addEventListener('pointermove', (e) => { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; }, { passive: true });
+  const bright = (m, v) => m.material.color.setScalar(v);
+
   const tick = () => {
     requestAnimationFrame(tick);
     if (!visible) return;
-    if (!reduced) intro = Math.min(1, (performance.now() - start) / 1400);
-    pos += (target - pos) * (reduced ? 1 : 0.075);
-    if (Math.abs(target - pos) < 1e-4) pos = target;
+    const intro = reduced ? 1 : Math.min(1, (performance.now() - start) / 1300);
     const e = 1 - Math.pow(1 - intro, 3);
-    ring.rotation.y = pos * STEP - (1 - e) * 0.5;
-    ring.scale.setScalar(0.9 + 0.1 * e);
-    meshes.forEach((m, i) => {
-      const off = Math.abs(i - pos);
-      // 앞 화면만 밝고, 옆으로 돌아가는 화면은 어두워집니다
-      const b = m.material.userData.ready ? Math.max(0.18, 1 - off * 0.85) * e : 0.07;
-      m.material.color.setScalar(b);
-      m.visible = off < 1.6;
-    });
+    pos += (target - pos) * (reduced ? 1 : 0.08);
+    if (Math.abs(target - pos) < 1e-4) pos = target;
+    const i = Math.min(N - 1, Math.floor(pos + 1e-6)), f = Math.min(1, pos - i);
+    const A = tex[i], B = tex[Math.min(N - 1, i + 1)];
+    // 넘김: 왼쪽 반장(A의 왼쪽)이 접는 선을 축으로 들려 오른쪽으로 넘어가고, 뒷면에는 B의 오른쪽이 있습니다
+    const theta = f * Math.PI;
+    mL.material.map = f > 0 ? B : A; // 들린 장 아래로 B의 왼쪽이 드러납니다
+    mR.material.map = A;              // 아직 덮이지 않은 오른쪽은 A
+    leafF.material.map = A; leafB.material.map = B;
+    [mL, mR, leafF, leafB].forEach((m) => { m.material.needsUpdate = m.material.userData.map !== m.material.map; m.material.userData.map = m.material.map; });
+    leafShape(theta);
+    leafF.visible = leafB.visible = f > 0.001;
+    // 밝기: 들린 장은 세워질수록 어둡게, 그 아래 드러나는 면은 그림자에서 밝아집니다
+    const ready = A.userData.ready ? 1 : 0.06;
+    const lit = Math.abs(Math.cos(theta));
+    bright(leafF, (0.35 + 0.65 * lit) * e * ready);
+    bright(leafB, (0.35 + 0.65 * lit) * e * ready);
+    bright(mL, (f > 0 ? 0.45 + 0.55 * Math.min(1, f * 1.6) : 1) * e * ready);
+    bright(mR, (1 - 0.5 * Math.max(0, f - 0.5) * 2) * e * ready);
+    spine.material.opacity = 0.35 * Math.sin(theta);
+    // 등장 + 마우스에 따라 살짝 기울기
+    smx += (mx - smx) * 0.05; smy += (my - smy) * 0.05;
+    book.rotation.y = (1 - e) * -0.6 + smx * 0.18;
+    book.rotation.x = smy * 0.08;
+    book.scale.setScalar(0.88 + 0.12 * e);
     renderer.render(scene, camera);
   };
   tick();
@@ -161,8 +233,8 @@ if (renderer) {
     const r = canvas.getBoundingClientRect();
     ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
-    const i = Math.round(pos);
-    if (ray.intersectObject(meshes[i]).length && SLIDES[i].link) window.open(SLIDES[i].link, '_blank', 'noopener');
+    const s = SLIDES[Math.round(pos)];
+    if (ray.intersectObjects([mL, mR]).length && s.link) window.open(s.link, '_blank', 'noopener');
   });
 }
 
@@ -193,8 +265,9 @@ function setupScroll() {
     const y = st.start + (+b.dataset.i / (N - 1)) * (st.end - st.start);
     window.lenis ? window.lenis.scrollTo(y, { duration: 1.2 }) : scrollTo(0, y);
   });
-  // 확인용: ?flip=2.5 → 그 위치로
-  const q = new URLSearchParams(location.search).get('flip');
-  if (q !== null) setTimeout(() => window.lenis?.scrollTo(st.start + (+q / (N - 1)) * (st.end - st.start), { immediate: true, force: true }), 300);
+  // 확인용: ?flip=2.5 → 그 위치로 (스크롤 없이 장면만 고정하려면 ?fliphold=2.5)
+  const qs = new URLSearchParams(location.search);
+  if (qs.has('flip')) setTimeout(() => window.lenis?.scrollTo(st.start + (+qs.get('flip') / (N - 1)) * (st.end - st.start), { immediate: true, force: true }), 300);
+  if (qs.has('fliphold')) { const v = +qs.get('fliphold'); setInterval(() => { target = v; pos = v; }, 16); }
 }
 setupScroll();
