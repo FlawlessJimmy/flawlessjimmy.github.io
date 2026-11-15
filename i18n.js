@@ -42,6 +42,12 @@
   const ATTRS = ['placeholder', 'aria-label', 'title', 'alt', 'data-cursor'];
   const BLOCKY = /^(P|H1|H2|H3|H4|H5|H6|LI|DT|DD|SPAN|B|STRONG|EM|SMALL|A|BUTTON|LABEL|FIGCAPTION|TD|TH|DIV|I|OPTION|LEGEND|SUMMARY|CAPTION|BLOCKQUOTE)$/;
 
+  // 묶음 바꾸기는 안쪽이 글 · 글 꾸밈 태그로만 되어 있을 때만 (사진 · 틀 · 아이콘이 있으면 지워지므로 글 조각마다 바꿈)
+  const INLINE = new Set(['SPAN', 'B', 'STRONG', 'EM', 'I', 'SMALL', 'BR', 'MARK', 'SUB', 'SUP', 'U', 'A']);
+  function onlyInline(el) {
+    for (const d of el.querySelectorAll('*')) if (!INLINE.has(d.tagName) || d.children.length && d.querySelector('img, svg, canvas, video, picture, figure, input, select, textarea, button')) return false;
+    return !el.querySelector('img, svg, canvas, video, picture');
+  }
   function trAttrs(el) {
     for (const a of ATTRS) {
       const v = el.getAttribute && el.getAttribute(a);
@@ -71,7 +77,7 @@
     if (root.nodeType === 3) { trTextNode(root); return; }
     if (root.nodeType !== 1 || SKIP.has(root.tagName)) return;
     // 1) 묶음 바꾸기
-    if (BLOCKY.test(root.tagName) && root.children.length && HANGUL.test(root.textContent) && !root.querySelector('[id]')) {
+    if (BLOCKY.test(root.tagName) && root.children.length && HANGUL.test(root.textContent) && !root.querySelector('[id]') && onlyInline(root)) {
       const k = norm(root.textContent);
       if (Object.prototype.hasOwnProperty.call(EN, k)) { root.innerHTML = EN[k]; trAttrs(root); return; }
     }
