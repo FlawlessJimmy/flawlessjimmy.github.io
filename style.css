@@ -457,7 +457,8 @@ h2.kr { letter-spacing: -.03em; line-height: 1.22; }
 .fi-desc { margin: 0; max-width: 640px; color: #a9b6bb; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.7; }
 .fi-side { display: grid; gap: 12px; justify-items: start; }
 .fi-year { font-size: 14px; color: var(--muted); letter-spacing: .06em; }
-.fi-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.fi-tags { display: flex; flex-wrap: nowrap; gap: 6px; margin-top: 16px; }
+.fi-tags span { white-space: nowrap; }
 .fi-tags span { font-size: 12.5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); color: #c5d0d4; }
 .fi-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 999px; background: var(--mint); color: #001a17; font-weight: 700; font-size: 14px; }
 .fi-link[hidden] { display: none; }
