@@ -720,3 +720,28 @@ h1, h2, h3 { text-wrap: balance; }
 .pr-steps li > * { position: relative; z-index: 1; }
 .fi-more[hidden] { display: none; }
 .fi-btns .fi-link.is-primary { background: var(--mint); color: #001a17; border-color: transparent; }
+
+/* KOR · EN 버튼 (메뉴 오른쪽 끝) — 큰 화면은 가운데 메뉴가 제자리에 있도록 세 칸으로 */
+@media (min-width: 861px) {
+  .nav { display: grid; grid-template-columns: 1fr auto 1fr; }
+  .nav .logo { justify-self: start; }
+  .nav-end { justify-self: end; }
+}
+.nav-end { display: flex; align-items: center; gap: 18px; }
+.lang-toggle { display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .04); }
+.lang-toggle button { appearance: none; border: 0; background: transparent; color: var(--muted); font: 600 11px/1 'Inter Tight', sans-serif; letter-spacing: .08em; padding: 7px 10px; border-radius: 999px; cursor: pointer; transition: color .3s, background .3s; }
+.lang-toggle button:hover { color: var(--fg); }
+.lang-toggle button.is-on { background: var(--mint); color: #001a17; cursor: default; }
+@media (max-width: 860px) {
+  .nav-end { gap: 0; }
+  .lang-toggle { padding: 2px; }
+  .lang-toggle button { font-size: 10px; padding: 6px 7px; letter-spacing: .06em; }
+}
+/* 좁은 휴대폰: 한 줄에 들어가도록 Work(로고와 같은 맨 위 이동)는 숨기고 간격을 줄입니다 */
+@media (max-width: 480px) {
+  .nav-links a[href="#top"] { display: none; }
+  .nav-links a { padding: 8px 6px; }
+  .lang-toggle button { padding: 6px 6px; }
+}
+/* 영어: 영문 글꼴로 */
+html[lang="en"] .kr { font-family: 'Inter Tight', 'Noto Sans KR', sans-serif; }

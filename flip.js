@@ -10,6 +10,10 @@ const SLIDES = [
   { img: 'shots/cover-earthmera.jpg', year: '2024 — 2025', kind: 'EarthMera · Founding Product Designer', title: 'EarthMera, 세 개의 프로덕트', desc: '뉴욕 친환경 스타트업의 파운딩 디자이너로 탄소 기록 앱, 이벤트 플랫폼, 링크인바이오 ZIGU를 기획부터 핸드오프까지 맡았습니다.', tags: ['신규 가입 +1,000', '미션 완료 90%', '구독 +100'], more: '#case-earthmera', link: 'https://www.earthmera.com/ko/' },
 ];
 
+// 영어일 때는 글을 미리 바꿔 둡니다 (아래 글 칸 높이를 영어 글로 재도록)
+const T = window.i18n ? window.i18n.t : (s) => s;
+SLIDES.forEach((s) => { s.kind = T(s.kind); s.title = T(s.title); s.desc = T(s.desc); s.tags = s.tags.map(T); });
+
 // 작업마다 바탕에 번지는 빛의 색
 const ACC = [[99, 54, 232], [255, 111, 15], [176, 196, 92], [60, 123, 255], [60, 207, 230], [98, 240, 221]];
 const $ = (s) => document.querySelector(s);

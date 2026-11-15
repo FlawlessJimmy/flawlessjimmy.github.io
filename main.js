@@ -6,6 +6,10 @@
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
+  /* KOR · EN 버튼: 메뉴 오른쪽 끝 */
+  window.i18n?.mountToggle($('.nav-end'), { className: 'nav-lang' });
+  const T = window.i18n ? window.i18n.t : (s) => s;
+
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.scrollTo(0, 0);
 
@@ -163,7 +167,7 @@
 
     /* NUMBERS: 숫자가 올라갑니다 */
     $$('.nums-grid [data-count]').forEach((el) => {
-      const to = +el.dataset.count, pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+      const to = +el.dataset.count, pre = el.dataset.prefix || '', suf = T(el.dataset.suffix || '');
       const o = { v: 0 };
       el.textContent = pre + '0' + suf;
       gsap.to(o, { v: to, duration: 1.6, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true }, onUpdate: () => { el.textContent = pre + Math.round(o.v).toLocaleString('ko-KR') + suf; } });
