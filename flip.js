@@ -140,15 +140,19 @@ if (renderer) {
   // 모서리를 둥글게 깎은 이미지 텍스처
   const loader = new THREE.ImageLoader();
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
+  const small = Math.min(innerWidth, innerHeight) < 760;
+  const CW = small ? 1200 : 1600, CH = CW * 0.625, CS = CW / 1600;
   const tex = SLIDES.map((s) => {
     const cv = document.createElement('canvas');
-    cv.width = 1600; cv.height = 1000;
+    cv.width = CW; cv.height = CH;
     const t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = maxAniso;
     t.userData.ready = false;
     loader.load(s.img, (img) => {
+      if (t.userData.live) return; // 움직이는 표지가 먼저 준비됐으면 그대로 둡니다
       const g = cv.getContext('2d');
+      g.setTransform(CS, 0, 0, CS, 0, 0);
       g.save(); g.beginPath(); g.roundRect(4, 4, 1592, 992, 40); g.clip();
       g.drawImage(img, 0, 0, 1600, 1000); g.restore();
       g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,.16)';
@@ -158,9 +162,144 @@ if (renderer) {
     return t;
   });
 
+  // ---------- 움직이는 표지: A 늘 살아 있는 표지 + C 판이 내려앉을 때 반동 ----------
+  // 표지를 배경 + 조각(글자·창·휴대폰·칩·견본·엑셀)으로 나눠 두고, 조각마다 성격에 맞는 작은 움직임을 계속 줍니다.
+  //  창: 천천히 떠 있고 가끔 유리 반사가 스침 · 휴대폰: 옆 폰은 살랑, 긴 화면은 안쪽이 스크롤
+  //  방 사진: 천천히 줌 · 자재 견본: 한 장씩 들렸다 내려앉음 · 엑셀: 화면 쪽으로 빨려 들어감 · 숫자 칩: 내려앉으면 카운트업
+  // 장이 넘어와 내려앉는 순간에는 위에 놓인 조각들이 쟁반 위 물건처럼 살짝 들썩였다 멈춥니다(가벼운 칩일수록 크게).
+  const DEPTH = { type: 0.8, win: 1, room: 1, phone: 1.15, swatch: 1.3, xls: 1.45, chip: 1.7 };
+  const live = SLIDES.map(() => null);
+  const landAt = SLIDES.map(() => -1);
+  const imgP = (src) => new Promise((ok, no) => { const im = new Image(); im.decoding = 'async'; im.onload = () => ok(im); im.onerror = no; im.src = src; });
+  const screenSrc = (p) => (p.startsWith('../') ? p.slice(3) : 'shots/live/src/' + p.split('/').pop());
+  function chipCount(b) {
+    const nums = [...b.matchAll(/\d+/g)];
+    if (!nums.length) return null;
+    const last = nums[nums.length - 1];
+    return { pre: b.slice(0, last.index), post: b.slice(last.index + last[0].length), to: +last[0], from: b.includes('→') && nums.length > 1 ? +nums[0][0] : 0 };
+  }
+  if (!reduced) fetch('shots/live/manifest.json').then((r) => r.json()).then((man) => {
+    SLIDES.forEach((s, i) => {
+      const m = s.img.match(/cover-(\w+?)(-en)?\.jpg/);
+      const e = m && man[m[1] + (m[2] || '')];
+      if (!e) return;
+      const layers = e.layers.map((l, k) => ({ ...l, d: DEPTH[l.kind] || 1, ph: (i * 1.9 + k * 2.4) % 6.28 })).sort((p, q) => p.z - q.z);
+      const kinds = {};
+      layers.forEach((l) => { l.ki = kinds[l.kind] = (kinds[l.kind] ?? -1) + 1; });
+      layers.forEach((l) => {
+        const sc = l.screen;
+        if (sc && l.kind === 'phone' && (sc.w * sc.nh) / sc.nw - sc.h > 60) l.scroll = (sc.w * sc.nh) / sc.nw - sc.h;
+        if (sc && l.kind === 'room') l.zoom = true;
+        if (l.chip) l.count = chipCount(l.chip.b);
+        l.bd = l.kind === 'chip' ? 0.06 : l.kind === 'type' ? 0 : 0.03;
+      });
+      const extra = layers.filter((l) => l.scroll || l.zoom);
+      Promise.all([imgP(e.bg), ...layers.map((l) => imgP(l.src)), ...extra.map((l) => imgP(screenSrc(l.screen.src)))]).then(([bg, ...ims]) => {
+        layers.forEach((l, k) => (l.img = ims[k]));
+        extra.forEach((l, k) => (l.scrImg = ims[layers.length + k]));
+        layers.filter((l) => l.kind === 'win').forEach((l) => { l.oc = document.createElement('canvas'); l.oc.width = l.w; l.oc.height = l.h; });
+        live[i] = { bg, layers, ctx: tex[i].image.getContext('2d') };
+        tex[i].userData.live = true; tex[i].userData.ready = true;
+      }).catch(() => {});
+    });
+  }).catch(() => {});
+
+  const clamp01 = (v) => Math.min(1, Math.max(0, v));
+  const outCubic = (v) => 1 - Math.pow(1 - v, 3);
+  // 창 위로 스치는 유리 반사 (조각 모양 안에서만)
+  function sheen(g, l, t) {
+    const per = 7, q = ((t + l.ph * 1.3) % per) / 1.3; // 7초마다 1.3초 동안
+    if (q >= 1) { g.drawImage(l.img, l.x, l.y, l.w, l.h); return; }
+    const o = l.oc.getContext('2d');
+    o.globalCompositeOperation = 'source-over';
+    o.clearRect(0, 0, l.w, l.h);
+    o.drawImage(l.img, 0, 0);
+    o.globalCompositeOperation = 'source-atop';
+    const bx = -l.w * 0.5 + q * l.w * 2;
+    const gr = o.createLinearGradient(bx - 160, 0, bx + 160, l.h * 0.35);
+    gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.5, 'rgba(255,255,255,.2)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    o.fillStyle = gr; o.fillRect(0, 0, l.w, l.h);
+    g.drawImage(l.oc, l.x, l.y, l.w, l.h);
+  }
+  function drawLive(i, t, px, py) {
+    const L = live[i], g = L.ctx;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, CW, CH);
+    g.setTransform(CS, 0, 0, CS, 0, 0);
+    g.save();
+    g.beginPath(); g.roundRect(4, 4, 1592, 992, 40); g.clip();
+    g.translate(800 - px * 8, 500 - py * 5); g.scale(1.03, 1.03); g.translate(-800, -500);
+    g.drawImage(L.bg, 0, 0, 1600, 1000);
+    g.setTransform(CS, 0, 0, CS, 0, 0);
+    const landed = landAt[i] >= 0, sinceLand = landed ? t - landAt[i] : -1;
+    for (const l of L.layers) {
+      const d = l.d;
+      let x = px * 14 * d, y = py * 9 * d, rot = 0, sc = 1, alpha = 1;
+      // C: 내려앉을 때 반동 (먼저 아래로 눌렸다 튀어 오르며 잦아듦)
+      const dt = sinceLand - l.bd;
+      if (landed && dt > 0 && dt < 1.6) {
+        const k = Math.exp(-dt * 5.2);
+        y += 13 * d * k * Math.sin(dt * 15);
+        rot += 0.012 * d * k * Math.sin(dt * 15 + 0.8) * (l.cx < 800 ? -1 : 1);
+      }
+      // A: 조각마다 늘 하는 작은 움직임
+      if (l.kind === 'win') { y += Math.sin(t * 0.6 + l.ph) * 3; rot += Math.sin(t * 0.45 + l.ph) * 0.004; }
+      else if (l.kind === 'phone' && Math.abs(l.screen?.rot || 0) > 0.05) rot += Math.sin(t * 0.7 + l.ph) * 0.014;
+      else if (l.kind === 'chip') y += Math.sin(t * 0.9 + l.ph) * 2.5;
+      else if (l.kind === 'swatch') {
+        const n = 4, q = ((t / 1.5 - l.ki) % n + n) % n;
+        if (q < 1) { const lift = Math.sin(q * Math.PI); y -= 30 * lift; rot += 0.06 * lift * (l.cx < 520 ? 1 : -1); sc += 0.05 * lift; }
+      } else if (l.kind === 'xls') {
+        const q = ((t + l.ki * 1.5) / 4.5) % 1, e = q * q;
+        x += (980 - l.cx) * e; y += (600 - l.cy) * e * 0.55; rot += e * 0.5; sc *= 1 - 0.5 * e;
+        alpha = Math.min(clamp01(q / 0.12), 1 - clamp01((q - 0.7) / 0.3));
+      }
+      g.globalAlpha = alpha;
+      g.translate(l.cx + x, l.cy + y); g.rotate(rot); g.scale(sc, sc); g.translate(-l.cx, -l.cy);
+      if (l.oc) sheen(g, l, t); else g.drawImage(l.img, l.x, l.y, l.w, l.h);
+      // 휴대폰 긴 화면은 안쪽이 천천히 스크롤, 방 사진은 천천히 줌
+      if (l.scrImg) {
+        const s = l.screen;
+        g.save();
+        g.translate(s.ox, s.oy); g.rotate(s.rot); g.translate(-s.ox, -s.oy);
+        g.beginPath(); g.roundRect(s.x, s.y, s.w, s.h, s.radius); g.clip();
+        if (l.scroll) {
+          const hh = (s.w * s.nh) / s.nw, cyc = (t + l.ph) / 30;
+          const yy = l.scroll * (0.5 - 0.5 * Math.cos(cyc * Math.PI * 2));
+          g.drawImage(l.scrImg, s.x, s.y - yy, s.w, hh);
+        } else {
+          const z = 1.05 + 0.05 * Math.sin(t * 0.22 + l.ph), r = Math.max(s.w / s.nw, s.h / s.nh) * z;
+          const w = s.nw * r, h = s.nh * r;
+          g.drawImage(l.scrImg, s.x + (s.w - w) / 2, s.y + (s.h - h) / 2, w, h);
+        }
+        g.restore();
+      }
+      // 숫자 칩: 내려앉으면 처음 값에서 끝 값까지 올라가거나(98%) 줄어듦(85초 → 4초)
+      if (l.count) {
+        const p = landed ? outCubic(clamp01((sinceLand - 0.3) / 1.2)) : 0;
+        if (p < 1) {
+          const c = l.chip, n = l.count;
+          g.fillStyle = c.bg;
+          g.fillRect(c.left + c.padL - 3, c.top + 6, c.bW + 6, c.h - 12);
+          g.fillStyle = c.color; g.textBaseline = 'middle';
+          g.font = `${c.bWeight} ${c.bSize}px ${c.bFam}`;
+          if ('letterSpacing' in g) g.letterSpacing = c.bLS;
+          g.fillText(n.pre + Math.round(n.from + (n.to - n.from) * p) + n.post, c.left + c.padL, c.top + c.h / 2 + 1);
+          if ('letterSpacing' in g) g.letterSpacing = '0px';
+        }
+      }
+      g.setTransform(CS, 0, 0, CS, 0, 0);
+      g.globalAlpha = 1;
+    }
+    g.restore();
+    g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,.16)';
+    g.beginPath(); g.roundRect(5.5, 5.5, 1589, 989, 39); g.stroke();
+    tex[i].needsUpdate = true;
+  }
+
   // 넘기는 장의 모양: 접는 선에서 바깥 가장자리까지 조금씩 방향을 바꾸며 이어 붙입니다.
-  // 가장자리가 접는 선보다 살짝 늦게 따라와 종이가 휘듯 말리는 느낌이 납니다.
-  const DS = (R * HALF) / SEG, CURL = 0.6;
+  // 딱딱한 판처럼 가장자리까지 한 번에 돌고, 똑바로 설 때 곡면이 펴졌다가 반대쪽 곡면으로 내려앉습니다.
+  const DS = (R * HALF) / SEG, CURL = 0; // 0 = 종이처럼 말리지 않고 딱딱한 판처럼 통째로 넘어갑니다
   function leafShape(theta) {
     const flipC = Math.cos(theta), lag = CURL * Math.sin(theta);
     let x = 0, z = 0;
@@ -235,7 +374,7 @@ if (renderer) {
   let visible = true;
   new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0 }).observe(section);
   const start = performance.now();
-  let mx = 0, my = 0, smx = 0, smy = 0;
+  let mx = 0, my = 0, smx = 0, smy = 0, frameN = 0;
   addEventListener('pointermove', (e) => { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; }, { passive: true });
   const bright = (m, v) => m.material.color.setScalar(v);
 
@@ -261,6 +400,18 @@ if (renderer) {
     [mL, mR, leafF, leafB].forEach((m) => { m.material.needsUpdate = m.material.userData.map !== m.material.map; m.material.userData.map = m.material.map; });
     leafShape(theta);
     leafF.visible = leafB.visible = f > 0;
+    // 보이는 장의 표지만 매 프레임 다시 그립니다 (휴대폰은 한 프레임 건너)
+    // 장이 완전히 자리 잡은 순간을 기록하고(반동 · 카운트업 시작), 화면에서 벗어난 장은 다시 처음 상태로
+    {
+      const tn = performance.now() / 1000;
+      for (let k = 0; k < N; k++) if (Math.abs(pos - k) >= 0.999) landAt[k] = -1;
+      if (f === 0 && e > 0.85 && landAt[i] < 0 && live[i]) landAt[i] = tn;
+    }
+    frameN++;
+    if (!small || frameN % 2 === 0) {
+      const tl = performance.now() / 1000;
+      for (const k of f > 0 ? [i, Math.min(N - 1, i + 1)] : [i]) if (live[k]) drawLive(k, tl, smx, smy);
+    }
     // 밝기: 들린 장은 세워질수록 어둡게, 그 아래 드러나는 면은 그림자에서 밝아집니다
     const ready = A.userData.ready ? 1 : 0.06;
     const lit = Math.abs(Math.cos(theta));
